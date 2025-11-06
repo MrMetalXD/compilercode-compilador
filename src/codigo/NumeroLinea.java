@@ -75,7 +75,7 @@ public class NumeroLinea extends JPanel
 		setFont( component.getFont() );
 
 		setBorderGap( 5 );
-		setCurrentLineForeground( Color.RED );
+		// setCurrentLineForeground( Color.RED );
 		setDigitAlignment( RIGHT );
 		setMinimumDisplayDigits( minimumDisplayDigits );
 
