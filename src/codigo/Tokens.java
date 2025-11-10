@@ -11,15 +11,31 @@ package codigo;
 
 public class Tokens {
     public String lexema;
-    public String tipo;
+    public String componente;
     public int linea;
     public int columna;
     
-    public Tokens(String lexema, String tipo, int linea, int columna){
+    public Tokens(String lexema, String componente, int linea, int columna){
         this.lexema = lexema;
-        this.tipo = tipo;
+        this.componente = componente;
         this.linea = linea;
         this.columna = columna;
+    }
+    
+    public String getLexema(){
+        return lexema;
+    }
+    
+    public String getComponente(){
+        return componente;
+    }
+    
+    public int getLinea(){
+        return linea;
+    }
+    
+    public int getColumna() {
+        return columna;
     }
 }
 /*
