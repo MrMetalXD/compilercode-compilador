@@ -9,9 +9,9 @@ import static codigo.Tokens.*;
 
 %{
     private final TablaSimbolos tablaSimbolos = new TablaSimbolos();
-
-    private Tokens tk(String lex, String comp, int li, int co){
-        return new Tokens(lex, comp, li+1, co+1); 
+    
+    private Tokens token(String lex, String comp, int li, int c){
+        return new Tokens(lex, comp, li+1, c+1); 
     }
 %}
 
@@ -20,168 +20,194 @@ ESPACIO = [ \t\r\n]+
 DIGITO = [0-9]
 ENTERO = {DIGITO}+
 DECIMAL = "." {DIGITO}+
+EXPRESION = [eE][+-]?{ENTERO}
 NUMERO = {ENTERO} ( {DECIMAL} )?
 
 IDENTIFICADOR = {LETRAS}({LETRAS}|{DIGITO})*
 CADENA = \"([^\"\\]|\\.)*\"
 COMENTARIO = \#.*                          
 
-/* Unidades físicas */
+/* Simbolos comunes en quimica */
 
-UNIDAD_CELSIUS = "C"    /* grados Celsius */
-UNIDAD_FAHRENHEIT = "F"  /* grados Fahrenheit */
-UNIDAD_HUMEDAD_REL = "%HR"  /* humedad relativa */
-UNIDAD_HUMEDAD_SUELO = "%HS"    /* humedad del suelo */
-UNIDAD_MILILITRO = "mL"    /*militros */
-UNIDAD_LITRO = "L"  /* litros */
-UNIDAD_SEGUNDO = "s"    /* segundos */
-UNIDAD_MINUTO = "min"   /* minutos */
-UNIDAD_HORA = "h"   /* horas */
-UNIDAD_LUX = "lux"  /* iluminacion lux */
-UNIDAD_PPDF = "ppfd"    /* densidad de fotones fotosinteticos */
+UNIDAD_MOL = "mol" /* mol cantidad de sustancia */
+UNIDAD_GRAMOS = "g" /* gramos */
+UNIDAD_KG = "kg" /* kilogramos */
+UNIDAD_L = "L" /* litros */
+UNIDAD_ML = "ml" /*mililitros */
+UNIDAD_ATM = "atm" /* atmosferas de presion */
+UNIDAD_KPA = "kPa" /* kilopascales (presion) */
+UNIDAD_BAR = "bar" /* otra unidad de presion */
+UNIDAD_K = "K" /* Kelvin */
+UNIDAD_C = "C" /* grados Celsius */
+UNIDAD_PCTJ = "%" /* porcentaje */
+UNIDAD_MOLAR = "M" /* molaridad = mol/L */
 
-TEMP_CELSIUS = {NUMERO}{UNIDAD_CELSIUS}
-TEMP_FAHRENHEIT = {NUMERO}{UNIDAD_FAHRENHEIT}
-HUMEDAD_RELATIVA = {NUMERO}{UNIDAD_HUMEDAD_REL}
-HUMEDAD_SUELO = {NUMERO}{UNIDAD_HUMEDAD_SUELO}
-VOLUMEN_ML = {NUMERO}{UNIDAD_MILILITRO}
-VOLUMEN_L = {NUMERO}{UNIDAD_LITRO}
-TIEMPO_SEGUNDOS = {NUMERO}{UNIDAD_SEGUNDO}
-TIEMPO_MINUTOS = {NUMERO}{UNIDAD_MINUTO}
-TIEMPO_HORAS = {NUMERO}{UNIDAD_HORA}
-ILUMINACION_LUX = {NUMERO}{UNIDAD_LUX}
-ILUMINACION_PPDF = {NUMERO}{UNIDAD_PPDF}
-
+LIT_NUM_U      = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD_ML}|{UNIDAD_ATM}|{UNIDAD_KPA}|{UNIDAD_BAR}|{UNIDAD_K}|{UNIDAD_C}|{UNIDAD_PCTJ}|{UNIDAD_MOLAR})
 %%
+/* Literales con unidad (ej.: 25C, 1.0atm, 0.1M, 50mL, 2.5 bar) */
 
-  /* espacios y comentarios */
-  {ESPACIO}                    { /* ignorar */ }
-  {COMENTARIO}                 { /* ignorar */ }
+/* espacios y comentarios */
+{ESPACIO}                    { /* ignorar */ }
+{COMENTARIO}                 { /* ignorar */ }
 
-    
+/* Control de flujo y utilidades */
+"SI"             { return token(yytext(),"SI",yyline,yycolumn); }
+"SINO"           { return token(yytext(),"SINO",yyline,yycolumn); }
+"FIN_SI"         { return token(yytext(),"FIN_SI",yyline,yycolumn); }
+"MIENTRAS"       { return token(yytext(),"MIENTRAS",yyline,yycolumn); }
+"FIN_MIENTRAS"   { return token(yytext(),"FIN_MIENTRAS",yyline,yycolumn); }
+"PARA"           { return token(yytext(),"PARA",yyline,yycolumn); }
+"FIN_PARA"       { return token(yytext(),"FIN_PARA",yyline,yycolumn); }
+"REPETIR"        { return token(yytext(),"REPETIR",yyline,yycolumn); }
+"VECES"          { return token(yytext(),"VECES",yyline,yycolumn); }
+"FIN_REPETIR"    { return token(yytext(),"FIN_REPETIR",yyline,yycolumn); }
+"ESPERAR"        { return token(yytext(),"ESPERAR",yyline,yycolumn); }
+"FUNCION"        { return token(yytext(),"FUNCION",yyline,yycolumn); }
+"RETORNAR"       { return token(yytext(),"RETORNAR",yyline,yycolumn); }
+"IMPRIMIR"       { return token(yytext(),"IMPRIMIR",yyline,yycolumn); }
+"LEER"           { return token(yytext(),"LEER",yyline,yycolumn); }
+"ALEATORIO"      { return token(yytext(),"ALEATORIO",yyline,yycolumn); }
 
-  /* -------- 1) CONTROL DE FLUJO -------- */
-  "SI" { return tk(yytext(),"SI",yyline,yycolumn); }
-  "ENTONCES" { return tk(yytext(),"ENTONCES",yyline,yycolumn); }
-  "SINO"   { return tk(yytext(),"SINO",yyline,yycolumn); }
-  "FIN_SI" { return tk(yytext(),"FIN_SI",yyline,yycolumn); }
+/* Organización / módulos */
+"EXPERIMENTO"                       { return token(yytext(),"EXPERIMENTO",yyline,yycolumn); }
+"FIN_EXPERIMENTO"                   { return token(yytext(),"FIN_EXPERIMENTO",yyline,yycolumn); }
+"BLOQUE"                            { return token(yytext(),"BLOQUE",yyline,yycolumn); }
+"FIN_BLOQUE"                        { return token(yytext(),"FIN_BLOQUE",yyline,yycolumn); }
+"IMPORTAR"                          { return token(yytext(),"IMPORTAR",yyline,yycolumn); }
+"PAQUETE"                           { return token(yytext(),"PAQUETE",yyline,yycolumn); }
+"USAR"                              { return token(yytext(),"USAR",yyline,yycolumn); }
+"CONSTANTE"                         { return token(yytext(),"CONSTANTE",yyline,yycolumn); }
+"VARIABLE"                          { return token(yytext(),"VARIABLE",yyline,yycolumn); }
 
-  "MIENTRAS" { return tk(yytext(),"MIENTRAS",yyline,yycolumn); }
-  "HACER" { return tk(yytext(),"HACER",yyline,yycolumn); }
-  "FIN_MIENTRAS" { return tk(yytext(),"FIN_MIENTRAS",yyline,yycolumn); }
-  "PARA" { return tk(yytext(),"PARA",yyline,yycolumn); }
-  "CADA" { return tk(yytext(),"CADA",yyline,yycolumn); }
-  "EN"  { return tk(yytext(),"EN",yyline,yycolumn); }
-  "FIN_PARA" { return tk(yytext(),"FIN_PARA",yyline,yycolumn); }
+/* Dominio químico: entidades y cantidades */
+"ELEMENTO"                          { return token(yytext(),"ELEMENTO",yyline,yycolumn); }
+"COMPUESTO"                         { return token(yytext(),"COMPUESTO",yyline,yycolumn); }
+"MEZCLA"                            { return token(yytext(),"MEZCLA",yyline,yycolumn); }
+"CANTIDAD"                          { return token(yytext(),"CANTIDAD",yyline,yycolumn); }
+"MOLES"                             { return token(yytext(),"MOLES",yyline,yycolumn); }
+"GRAMOS"                            { return token(yytext(),"GRAMOS",yyline,yycolumn); }
+"LITROS"                            { return token(yytext(),"LITROS",yyline,yycolumn); }
+"ESTADO"                            { return token(yytext(),"ESTADO",yyline,yycolumn); }
+"SOLIDO"                            { return token(yytext(),"SOLIDO",yyline,yycolumn); }
+"LIQUIDO"                           { return token(yytext(),"LIQUIDO",yyline,yycolumn); }
+"GAS"                               { return token(yytext(),"GAS",yyline,yycolumn); }
+"ACUOSO"                            { return token(yytext(),"ACUOSO",yyline,yycolumn); }
+"PUREZA"                            { return token(yytext(),"PUREZA",yyline,yycolumn); }
+"CONCENTRACION"                     { return token(yytext(),"CONCENTRACION",yyline,yycolumn); }
+"MOLARIDAD"                         { return token(yytext(),"MOLARIDAD",yyline,yycolumn); }
 
-  "INTENTAR" { return tk(yytext(),"INTENTAR",yyline,yycolumn); }
-  "CAPTURAR" { return tk(yytext(),"CAPTURAR",yyline,yycolumn); }
-  "FIN_INTENTAR"  { return tk(yytext(),"FIN_INTENTAR",yyline,yycolumn); }
+/* 4.3 Acciones de laboratorio (core) */
+"CREAR"                             { return token(yytext(),"CREAR",yyline,yycolumn); }
+"ELIMINAR"                          { return token(yytext(),"ELIMINAR",yyline,yycolumn); }
+"LIMPIAR"                           { return token(yytext(),"LIMPIAR",yyline,yycolumn); }
+"COMBINAR"                          { return token(yytext(),"COMBINAR",yyline,yycolumn); }
+"AGREGAR"                           { return token(yytext(),"AGREGAR",yyline,yycolumn); }
+"DISOLVER"                          { return token(yytext(),"DISOLVER",yyline,yycolumn); }
+"PRECIPITAR"                        { return token(yytext(),"PRECIPITAR",yyline,yycolumn); }
+"EVAPORAR"                          { return token(yytext(),"EVAPORAR",yyline,yycolumn); }
+"DESTILAR"                          { return token(yytext(),"DESTILAR",yyline,yycolumn); }
+"FILTRAR"                           { return token(yytext(),"FILTRAR",yyline,yycolumn); }
+"TITULAR"                           { return token(yytext(),"TITULAR",yyline,yycolumn); }
+"USAR_CATALIZADOR"                  { return token(yytext(),"USAR_CATALIZADOR",yyline,yycolumn); }
+"AJUSTAR_TEMPERATURA"               { return token(yytext(),"AJUSTAR_TEMPERATURA",yyline,yycolumn); }
+"AJUSTAR_PRESION"                   { return token(yytext(),"AJUSTAR_PRESION",yyline,yycolumn); }
+"AGITAR"                            { return token(yytext(),"AGITAR",yyline,yycolumn); }
+"CALENTAR"                          { return token(yytext(),"CALENTAR",yyline,yycolumn); }
+"ENFRIAR"                           { return token(yytext(),"ENFRIAR",yyline,yycolumn); }
+"ANOTAR"                            { return token(yytext(),"ANOTAR",yyline,yycolumn); }
 
-  "RETORNAR" { return tk(yytext(),"RETORNAR",yyline,yycolumn); }
-  "ROMPER" { return tk(yytext(),"ROMPER",yyline,yycolumn); }
-  "CONTINUAR" { return tk(yytext(),"CONTINUAR",yyline,yycolumn); }
+/* 4.6 Reportes, evaluación y persistencia */
+"GENERAR_REPORTE"                   { return token(yytext(),"GENERAR_REPORTE",yyline,yycolumn); }
+"EXPORTAR"                          { return token(yytext(),"EXPORTAR",yyline,yycolumn); }
+"GUARDAR"                           { return token(yytext(),"GUARDAR",yyline,yycolumn); }
+"CARGAR"                            { return token(yytext(),"CARGAR",yyline,yycolumn); }
+"EXPLICAR_REACCION"                 { return token(yytext(),"EXPLICAR_REACCION",yyline,yycolumn); }
+"ADVERTIR"                          { return token(yytext(),"ADVERTIR",yyline,yycolumn); }
+"RUBRICA"                           { return token(yytext(),"RUBRICA",yyline,yycolumn); }
+"PUNTUACION"                        { return token(yytext(),"PUNTUACION",yyline,yycolumn); }
 
-  /* -------- 2) BLOQUES / ESTRUCTURA -------- */
-  "CONFIGURACION" { return tk(yytext(),"CONFIGURACION",yyline,yycolumn); }
-  "FIN_CONFIGURACION" { return tk(yytext(),"FIN_CONFIGURACION",yyline,yycolumn); }
-  "RUTINAS" { return tk(yytext(),"RUTINAS",yyline,yycolumn); }
-  "FIN_RUTINAS" { return tk(yytext(),"FIN_RUTINAS",yyline,yycolumn); }
-  "PRINCIPAL" { return tk(yytext(),"PRINCIPAL",yyline,yycolumn); }
-  "FIN_PRINCIPAL" { return tk(yytext(),"FIN_PRINCIPAL",yyline,yycolumn); }
-  "RUTINA" { return tk(yytext(),"RUTINA",yyline,yycolumn); }
-  "FIN_RUTINA" { return tk(yytext(),"FIN_RUTINA",yyline,yycolumn); }
-  "FIN" { return tk(yytext(),"FIN",yyline,yycolumn); }
+/* 4.4 Análisis, predicción y propiedades */
+"INFO"                              { return token(yytext(),"INFO",yyline,yycolumn); }
+"MASA_MOLAR"                        { return token(yytext(),"MASA_MOLAR",yyline,yycolumn); }
+"BALANCEAR"                         { return token(yytext(),"BALANCEAR",yyline,yycolumn); }
+"TIPO_REACCION"                     { return token(yytext(),"TIPO_REACCION",yyline,yycolumn); }
+"ENERGIA_REACCION"                  { return token(yytext(),"ENERGIA_REACCION",yyline,yycolumn); }
+"ENTALPIA"                          { return token(yytext(),"ENTALPIA",yyline,yycolumn); }
+"ENTROPIA"                          { return token(yytext(),"ENTROPIA",yyline,yycolumn); }
+"GIBBS"                             { return token(yytext(),"GIBBS",yyline,yycolumn); }
+"PREDICIR_PRODUCTO"                 { return token(yytext(),"PREDICIR_PRODUCTO",yyline,yycolumn); }
+"EQUILIBRIO"                        { return token(yytext(),"EQUILIBRIO",yyline,yycolumn); }
+"PKA"                               { return token(yytext(),"PKA",yyline,yycolumn); }
+"PH"                                { return token(yytext(),"PH",yyline,yycolumn); }
+"ESTEQUIOMETRIA"                    { return token(yytext(),"ESTEQUIOMETRIA",yyline,yycolumn); }
+"REACTIVO_LIMITANTE"                { return token(yytext(),"REACTIVO_LIMITANTE",yyline,yycolumn); }
 
-  /* -------- 3) ENTIDADES DEL DOMINIO -------- */
-  "SENSOR" { return tk(yytext(),"SENSOR",yyline,yycolumn); }
-  "ACTUADOR" { return tk(yytext(),"ACTUADOR",yyline,yycolumn); }
-  "ZONA" { return tk(yytext(),"ZONA",yyline,yycolumn); }
+/* 4.8 Tipos y literales especiales */
+"NUMERO"                            { return token(yytext(),"TIPO_NUMERO",yyline,yycolumn); }
+"CADENA"                            { return token(yytext(),"TIPO_CADENA",yyline,yycolumn); }
+"BOOLEANO"                          { return token(yytext(),"TIPO_BOOLEANO",yyline,yycolumn); }
+"LISTA"                             { return token(yytext(),"TIPO_LISTA",yyline,yycolumn); }
+"MAPA"                              { return token(yytext(),"TIPO_MAPA",yyline,yycolumn); }
+"VERDADERO"                         { return token(yytext(),"VERDADERO",yyline,yycolumn); }
+"FALSO"                             { return token(yytext(),"FALSO",yyline,yycolumn); }
+"NULO"                              { return token(yytext(),"NULO",yyline,yycolumn); }
 
-  "NUMERO" { return tk(yytext(),"TIPO_NUMERO",yyline,yycolumn); }
-  "LOGICO" { return tk(yytext(),"TIPO_LOGICO",yyline,yycolumn); }
-  "TEXTO" { return tk(yytext(),"TIPO_TEXTO",yyline,yycolumn); }
-  "NULO" { return tk(yytext(),"NULO",yyline,yycolumn); }
-  "RANGO_TIEMPO" { return tk(yytext(),"RANGO_TIEMPO",yyline,yycolumn); }
+/* ====== 5) Operadores ====== */
+/* Reacción */
+"->"                                { return token(yytext(),"OP_FLECHA",yyline,yycolumn); }
+"+"                                 { return token(yytext(),"OP_MAS",yyline,yycolumn); }
 
-  "VERDADERO" { return tk(yytext(),"VERDADERO",yyline,yycolumn); }
-  "FALSO" { return tk(yytext(),"FALSO",yyline,yycolumn); }
+/* Aritméticos */
+"-"                                 { return token(yytext(),"OP_MENOS",yyline,yycolumn); }
+"*"                                 { return token(yytext(),"OP_POR",yyline,yycolumn); }
+"/"                                 { return token(yytext(),"OP_DIV",yyline,yycolumn); }
+"^"                                 { return token(yytext(),"OP_POW",yyline,yycolumn); }
 
-  /* -------- 4) ACCIONES AGRÍCOLAS -------- */
-  "REGAR" { return tk(yytext(),"REGAR",yyline,yycolumn); }
-  "FERTILIZAR" { return tk(yytext(),"FERTILIZAR",yyline,yycolumn); }
-  "VENTILAR" { return tk(yytext(),"VENTILAR",yyline,yycolumn); }
-  "CALEFACCIONAR" { return tk(yytext(),"CALEFACCIONAR",yyline,yycolumn); }
-  "ILUMINAR" { return tk(yytext(),"ILUMINAR",yyline,yycolumn); }
-  "ROCIAR_PLAGUICIDA" { return tk(yytext(),"ROCIAR_PLAGUICIDA",yyline,yycolumn); }
-  "ACTIVAR"  { return tk(yytext(),"ACTIVAR",yyline,yycolumn); }
-  "DESACTIVAR" { return tk(yytext(),"DESACTIVAR",yyline,yycolumn); }
-  "AJUSTAR_POTENCIA" { return tk(yytext(),"AJUSTAR_POTENCIA",yyline,yycolumn); }
-  "LEER" { return tk(yytext(),"LEER",yyline,yycolumn); }
-  "PROMEDIO" { return tk(yytext(),"PROMEDIO",yyline,yycolumn); }
-  "MAX" { return tk(yytext(),"MAX",yyline,yycolumn); }
-  "MIN" { return tk(yytext(),"MIN",yyline,yycolumn); }
-  "ENVIAR_ALERTA" { return tk(yytext(),"ENVIAR_ALERTA",yyline,yycolumn); }
+/* Relacionales */
+"=="                                { return token(yytext(),"OP_IGUAL",yyline,yycolumn); }
+"!="                                { return token(yytext(),"OP_DIF",yyline,yycolumn); }
+"<="                                { return token(yytext(),"OP_MENOR_IGUAL",yyline,yycolumn); }
+">="                                { return token(yytext(),"OP_MAYOR_IGUAL",yyline,yycolumn); }
+"<"                                 { return token(yytext(),"OP_MENOR",yyline,yycolumn); }
+">"                                 { return token(yytext(),"OP_MAYOR",yyline,yycolumn); }
+"="                                 { return token(yytext(),"OP_ASIGN",yyline,yycolumn); }
 
-  /* -------- 5) TIEMPO -------- */
-  "AHORA"  { return tk(yytext(),"AHORA",yyline,yycolumn); }
-  "DE" { return tk(yytext(),"DE",yyline,yycolumn); }
-  "A" { return tk(yytext(),"A",yyline,yycolumn); }
-  "ESPERAR" { return tk(yytext(),"ESPERAR",yyline,yycolumn); }
-  "DURACION" { return tk(yytext(),"DURACION",yyline,yycolumn); }
+/* Lógicos (símbolos y alias en español) */
+"Y"                                 { return token(yytext(),"OP_AND",yyline,yycolumn); }
+"O"                                 { return token(yytext(),"OP_OR",yyline,yycolumn); }
+"NO"                                { return token(yytext(),"OP_NOT",yyline,yycolumn); }
 
-  /* -------- 6) OPERADORES -------- */
-  "==" { return tk(yytext(),"OP_IGUAL_IGUAL",yyline,yycolumn); }
-  "!=" { return tk(yytext(),"OP_DIFERENTE",yyline,yycolumn); }
-  "<=" { return tk(yytext(),"OP_MENOR_IGUAL",yyline,yycolumn); }
-  ">=" { return tk(yytext(),"OP_MAYOR_IGUAL",yyline,yycolumn); }
-  "<" { return tk(yytext(),"OP_MENOR",yyline,yycolumn); }
-  ">" { return tk(yytext(),"OP_MAYOR",yyline,yycolumn); }
-  "=" { return tk(yytext(),"OP_ASIGNACION",yyline,yycolumn); }
-  "NO" { return tk(yytext(),"OP_LOGICO_NOT",yyline,yycolumn); }
-  "Y" { return tk(yytext(),"OP_LOGICO_AND",yyline,yycolumn); }
-  "O" { return tk(yytext(),"OP_LOGICO_OR",yyline,yycolumn); }
-  "+" { return tk(yytext(),"OP_SUMA",yyline,yycolumn); }
-  "-" { return tk(yytext(),"OP_RESTA",yyline,yycolumn); }
-  "*" { return tk(yytext(),"OP_MULTIPLICACION",yyline,yycolumn); }
-  "/" { return tk(yytext(),"OP_DIVISION",yyline,yycolumn); }
+/* ====== 6) Delimitadores ====== */
+"("                                 { return token(yytext(),"PAREN_ABRE",yyline,yycolumn); }
+")"                                 { return token(yytext(),"PAREN_CIERRA",yyline,yycolumn); }
+"{"                                 { return token(yytext(),"LLAVE_ABRE",yyline,yycolumn); }
+"}"                                 { return token(yytext(),"LLAVE_CIERRA",yyline,yycolumn); }
+"["                                 { return token(yytext(),"CORCHETE_ABRE",yyline,yycolumn); }
+"]"                                 { return token(yytext(),"CORCHETE_CIERRA",yyline,yycolumn); }
+","                                 { return token(yytext(),"COMA",yyline,yycolumn); }
+":"                                 { return token(yytext(),"DOS_PUNTOS",yyline,yycolumn); }
+";"                                 { return token(yytext(),"PUNTO_COMA",yyline,yycolumn); }
 
-  /* -------- Delimitadores -------- */
-  "(" { return tk(yytext(),"PAREN_ABRE",yyline,yycolumn); }
-  ")" { return tk(yytext(),"PAREN_CIERRA",yyline,yycolumn); }
-  "{" { return tk(yytext(),"LLAVE_ABRE",yyline,yycolumn); }
-  "}" { return tk(yytext(),"LLAVE_CIERRA",yyline,yycolumn); }
-  "[" { return tk(yytext(),"CORCHETE_ABRE",yyline,yycolumn); }
-  "]" { return tk(yytext(),"CORCHETE_CIERRA",yyline,yycolumn); }
-  "," { return tk(yytext(),"COMA",yyline,yycolumn); }
-  ":" { return tk(yytext(),"DOS_PUNTOS",yyline,yycolumn); }
+/* ====== 7) Literales ====== */
+{CADENA}                            { return token(yytext(),"LIT_CADENA",yyline,yycolumn); }
+{LIT_NUM_U}                         { return token(yytext(),"LIT_NUM_CON_UNIDAD",yyline,yycolumn); }
+{NUMERO}                            { return token(yytext(),"LIT_NUMERO",yyline,yycolumn); }
 
-  /* -------- 9) LITERALES -------- */
-  {TEMP_CELSIUS} { return tk(yytext(),"LIT_TEMP_CELSIUS",yyline,yycolumn); }
-  {TEMP_FAHRENHEIT} { return tk(yytext(),"LIT_TEMP_FAHRENHEIT",yyline,yycolumn); }
-  {HUMEDAD_RELATIVA} { return tk(yytext(),"LIT_HUMEDAD_RELATIVA",yyline,yycolumn); }
-  {HUMEDAD_SUELO} { return tk(yytext(),"LIT_HUMEDAD_SUELO",yyline,yycolumn); }
-  {VOLUMEN_ML} { return tk(yytext(),"LIT_VOLUMEN_ML",yyline,yycolumn); }
-  {VOLUMEN_L} { return tk(yytext(),"LIT_VOLUMEN_L",yyline,yycolumn); }
-  {TIEMPO_SEGUNDOS} { return tk(yytext(),"LIT_TIEMPO_S",yyline,yycolumn); }
-  {TIEMPO_MINUTOS} { return tk(yytext(),"LIT_TIEMPO_MIN",yyline,yycolumn); }
-  {TIEMPO_HORAS} { return tk(yytext(),"LIT_TIEMPO_HRS",yyline,yycolumn); }
-  {ILUMINACION_LUX} { return tk(yytext(),"ILU_LUX",yyline,yycolumn); }
-  {ILUMINACION_PPDF} { return tk(yytext(),"ILU_PPDF",yyline,yycolumn); }
 
-  {NUMERO} { return tk(yytext(),"LIT_NUMERO",yyline,yycolumn); }
 
   /* -------- Identificadores -------- */
   {IDENTIFICADOR} {
-        if (tablaSimbolos.esReservada(yytext()))
-            return tk(yytext(),"ERROR_IDENTIFICADOR_ES_PALABRA_RESERVADA",yyline,yycolumn);
+        if (tablaSimbolos.esReservada(yytext())){
+            return token(yytext(),"ERROR_IDENTIFICADOR_ES_PALABRA_RESERVADA",yyline,yycolumn);
+        } else {
             tablaSimbolos.registrarIdentificador(yytext(), yyline+1, yycolumn+1);
-            return tk(yytext(),"IDENTIFICADOR",yyline,yycolumn);
-        }
+            return token(yytext(),"IDENTIFICADOR",yyline,yycolumn);
+        }             
+  }
 
   /* -------- Errores léxicos comunes -------- */
-  \"[^\"\n]* { return tk(yytext(),"ERROR_CADENA_NO_CERRADA",yyline,yycolumn); }
-  [^\s\w\[\]{}();:,.=<>+\-*/\"ÁÉÍÓÚÜÑáéíóúüñ%] { return tk(yytext(),"ERROR_CARACTER_INVALIDO",yyline,yycolumn); }
+  \"[^\"\n]* { return token(yytext(),"ERROR_CADENA_NO_CERRADA",yyline,yycolumn); }
+  [^\s\w\[\]{}();:,.=<>+\-*/\"ÁÉÍÓÚÜÑáéíóúüñ%] { return token(yytext(),"ERROR_CARACTER_INVALIDO",yyline,yycolumn); }
 
 /* -------- Error de análisis -------- */
 . {return token(yytext(), "ERROR", yyline, yycolumn);}
