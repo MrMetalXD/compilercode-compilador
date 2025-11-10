@@ -1075,7 +1075,7 @@ class Lexer {
   private int zzEndRead;
 
   /** number of newlines encountered up to the start of the matched text */
-  private int yyline;
+  int yyline;
 
   /** the number of characters up to the start of the matched text */
   private int yychar;
