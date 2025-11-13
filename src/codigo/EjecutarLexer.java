@@ -13,7 +13,7 @@ import java.io.File;
 public class EjecutarLexer {
     public static void main(String[] args) {
         // Cambiar la ruta de acuerdo a su equipo
-        String ruta = "C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/Proyecto Compilador/agrocode-compilador/src/codigo/Lexer.flex";
+        String ruta = "C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/Proyecto Compilador/quimcode-compilador/src/codigo/Lexer.flex";
         generarLexer(ruta);
     }
     
