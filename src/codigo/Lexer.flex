@@ -46,7 +46,7 @@ UNIDAD_C = "C" /* grados Celsius */
 UNIDAD_PCTJ = "%" /* porcentaje */
 UNIDAD_MOLAR = "M" /* molaridad = mol/L */
 
-LIT_NUM_U = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD_ML}|{UNIDAD_ATM}|{UNIDAD_KPA}|{UNIDAD_BAR}|{UNIDAD_K}|{UNIDAD_C}|{UNIDAD_PCTJ}|{UNIDAD_MOLAR})
+LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD_ML}|{UNIDAD_ATM}|{UNIDAD_KPA}|{UNIDAD_BAR}|{UNIDAD_K}|{UNIDAD_C}|{UNIDAD_PCTJ}|{UNIDAD_MOLAR})
 %%
 /* espacios y comentarios */
 {ESPACIO}                    { /* ignorar */ }
@@ -54,6 +54,7 @@ LIT_NUM_U = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD
 
 "si" { return token(yytext(),"TKN_SI",yyline,yycolumn); }
 "sino" { return token(yytext(),"TKN_SINO",yyline,yycolumn); }
+"sino_si" { return token(yytext(),"TKN_SINO_SI",yyline,yycolumn); }
 "fin_si" { return token(yytext(),"TKN_FIN_SI",yyline,yycolumn); }
 "mientras" { return token(yytext(),"TKN_MIENTRAS",yyline,yycolumn); }
 "fin_mientras" { return token(yytext(),"TKN_FIN_MIENTRAS",yyline,yycolumn); }
@@ -70,6 +71,7 @@ LIT_NUM_U = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD
 "estado" { return token(yytext(),"TKN_ESTADO",yyline,yycolumn); }
 "solido" { return token(yytext(),"TKN_SOLIDO",yyline,yycolumn); }
 "liquido" { return token(yytext(),"TKN_LIQUIDO",yyline,yycolumn); }
+"litro" { return token(yytext(),"TKN_LITRO",yyline,yycolumn); }
 "gaseoso" { return token(yytext(),"TKN_GASEOSO",yyline,yycolumn); }
 "acuoso" { return token(yytext(),"TKN_ACUOSO",yyline,yycolumn); }
 "reaccion" { return token(yytext(),"TKN_reaccion",yyline,yycolumn); }
@@ -92,9 +94,9 @@ LIT_NUM_U = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD
 "balancear_reaccion" { return token(yytext(),"TKN_BALANCEAR_REACCION",yyline,yycolumn); }
 "ejecutar_reaccion" { return token(yytext(),"TKN_EJECUTAR_REACCION",yyline,yycolumn); }
 "duracion" {return token(yytext(),"TKN_DURACION",yyline,yycolumn);}
-"mostrar" { return token(yytext(),"GENERAR_REPORTE",yyline,yycolumn); }
-"mostrar_info" { return token(yytext(),"EXPLICAR_REACCION",yyline,yycolumn); }
-"enviar_alerta" { return token(yytext(),"ADVERTIR",yyline,yycolumn); }
+"mostrar" { return token(yytext(),"TKNK_MOSTRAR",yyline,yycolumn); }
+"mostrar_info" { return token(yytext(),"TKN_MOSTRAR_INFO",yyline,yycolumn); }
+"enviar_alerta" { return token(yytext(),"TKN_ENVIAR_ALERTA",yyline,yycolumn); }
 "imprimir" { return token(yytext(),"TKN_IMPRIMIR",yyline,yycolumn); }
  
 "+" { return token(yytext(),"OP_MAS",yyline,yycolumn); }
@@ -121,12 +123,9 @@ LIT_NUM_U = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD
 ":" { return token(yytext(),"DOS_PUNTOS",yyline,yycolumn); }
 ";" { return token(yytext(),"PUNTO_COMA",yyline,yycolumn); }
 
-/* ====== 7) Literales ====== */
-{CADENA}                            { return token(yytext(),"LIT_CADENA",yyline,yycolumn); }
-{LIT_NUM_U}                         { return token(yytext(),"LIT_NUM_CON_UNIDAD",yyline,yycolumn); }
-{NUMERO}                            { return token(yytext(),"LIT_NUMERO",yyline,yycolumn); }
-
-
+{CADENA} { return token(yytext(),"CADENA",yyline,yycolumn); }
+{LIT_NUMERICA} { return token(yytext(),"LIT_NUMERICA",yyline,yycolumn); }
+{NUMERO} { return token(yytext(),"NUMERO",yyline,yycolumn); }
 
   /* -------- Identificadores -------- */
   {IDENTIFICADOR} {
