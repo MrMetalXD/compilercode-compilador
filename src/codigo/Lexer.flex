@@ -24,7 +24,7 @@ import static codigo.Tokens.*;
     }
 %}
 
-LETRAS = [a-zA-Z_]+
+LETRA = [a-zA-Z_]+
 ESPACIO = [ \t\r\n]+
 DIGITO = [0-9]
 ENTERO = {DIGITO}+
@@ -32,11 +32,11 @@ DECIMAL = "." {DIGITO}+
 EXPRESION = [eE][+-]?{ENTERO}
 NUMERO = {ENTERO} ( {DECIMAL} )?
 
-IDENTIFICADOR = {LETRAS}({LETRAS}|{DIGITO})*
+IDENTIFICADOR = ({LETRA} | {GUION_B}{LETRA}) ({LETRA} | {DIGITO})*
 CADENA = \"([^\"\\]|\\.)*\"
-COMENTARIO = \#.*                          
+COMENTARIO = \#.*
+GUION_B = _                          
 
-/* Simbolos comunes en quimica */
 
 UNIDAD_MOL = "mol" /* mol cantidad de sustancia */
 UNIDAD_GRAMOS = "g" /* gramos */
@@ -66,7 +66,7 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 "hacer" { return token(yytext(),"TKN_HACER",yyline,yycolumn); }
 
 "principal" { return token(yytext(),"TKN_PRINCIPAL",yyline,yycolumn); }
-"fin_principal" { return token(yytext(),"TKN_FIN_PRINCIPIAL",yyline,yycolumn); }
+"fin_principal" { return token(yytext(),"TKN_FIN_PRINCIPAL",yyline,yycolumn); }
 
 "elemento" { return token(yytext(),"TKN_ELEMENTO",yyline,yycolumn); }
 "compuesto" { return token(yytext(),"TKN_COMPUESTO",yyline,yycolumn); }
@@ -79,7 +79,7 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 "litro" { return token(yytext(),"TKN_LITRO",yyline,yycolumn); }
 "gaseoso" { return token(yytext(),"TKN_GASEOSO",yyline,yycolumn); }
 "acuoso" { return token(yytext(),"TKN_ACUOSO",yyline,yycolumn); }
-"reaccion" { return token(yytext(),"TKN_reaccion",yyline,yycolumn); }
+"reaccion" { return token(yytext(),"TKN_REACCION",yyline,yycolumn); }
 
 "agregar" { return token(yytext(),"TKN_AGREGAR",yyline,yycolumn); }
 "eliminar" { return token(yytext(),"TKN_ELIMINAR",yyline,yycolumn); }
@@ -99,7 +99,7 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 "balancear_reaccion" { return token(yytext(),"TKN_BALANCEAR_REACCION",yyline,yycolumn); }
 "ejecutar_reaccion" { return token(yytext(),"TKN_EJECUTAR_REACCION",yyline,yycolumn); }
 "duracion" {return token(yytext(),"TKN_DURACION",yyline,yycolumn);}
-"mostrar" { return token(yytext(),"TKNK_MOSTRAR",yyline,yycolumn); }
+"mostrar" { return token(yytext(),"TKN_MOSTRAR",yyline,yycolumn); }
 "mostrar_info" { return token(yytext(),"TKN_MOSTRAR_INFO",yyline,yycolumn); }
 "enviar_alerta" { return token(yytext(),"TKN_ENVIAR_ALERTA",yyline,yycolumn); }
 "imprimir" { return token(yytext(),"TKN_IMPRIMIR",yyline,yycolumn); }
@@ -132,13 +132,17 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 {LIT_NUMERICA} { return token(yytext(),"LIT_NUMERICA",yyline,yycolumn); }
 {NUMERO} { return token(yytext(),"NUMERO",yyline,yycolumn); }
 
+/*   ERRORES DE IDENTIFICADOR    */
+({DIGITO}+{LETRA}({LETRA}|{DIGITO})*) | ({GUION_B}({DIGITO}|{GUION_B})({LETRA}|{DIGITO}|{GUION_B})*) | ({GUION_B})  { return token(yytext(), "ERROR_IDENTIFICADOR_INVALIDO", yyline, yycolumn);}
+
  /* -------- Identificadores -------- */
+
   {IDENTIFICADOR} {
-        // 1. Revisa la "Tabla Fija"
+        // Revisa la "Tabla Fija"
         if (TablaPalabrasReservadas.esReservada(yytext())){
-            return token(yytext(),"ERROR_IDENTIFICADOR_ES_PALABRA_RESERVADA",yyline,yycolumn);
+            return token(yytext(),"Error identificador es palabra reservada",yyline,yycolumn);
         } else {
-            // 2. Si no es reservada, la registra en la "Tabla de identificadores"
+            // Si no es reservada, la registra en la "Tabla de identificadores"
             tablaSimbolos.registrarIdentificador(yytext(), yyline+1, yycolumn+1);
             return token(yytext(),"IDENTIFICADOR",yyline,yycolumn);
         }             
@@ -150,3 +154,6 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 
 /* -------- Error de análisis -------- */
 . {return token(yytext(), "ERROR", yyline, yycolumn);}
+
+
+
