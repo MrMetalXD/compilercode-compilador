@@ -24,34 +24,19 @@ import static codigo.Tokens.*;
     }
 %}
 
+GUION_B = _   
 LETRA = [a-zA-Z_]+
 ESPACIO = [ \t\r\n]+
 DIGITO = [0-9]
 ENTERO = {DIGITO}+
 DECIMAL = "." {DIGITO}+
-EXPRESION = [eE][+-]?{ENTERO}
 NUMERO = {ENTERO} ( {DECIMAL} )?
 
 IDENTIFICADOR = ({LETRA} | {GUION_B}{LETRA}) ({LETRA} | {DIGITO})*
 CADENA = \"([^\"\\]|\\.)*\"
 COMENTARIO = \#.*
-GUION_B = _                          
+                       
 
-
-UNIDAD_MOL = "mol" /* mol cantidad de sustancia */
-UNIDAD_GRAMOS = "g" /* gramos */
-UNIDAD_KG = "kg" /* kilogramos */
-UNIDAD_L = "L" /* litros */
-UNIDAD_ML = "ml" /*mililitros */
-UNIDAD_ATM = "atm" /* atmosferas de presion */
-UNIDAD_KPA = "kPa" /* kilopascales (presion) */
-UNIDAD_BAR = "bar" /* otra unidad de presion */
-UNIDAD_K = "K" /* Kelvin */
-UNIDAD_C = "C" /* grados Celsius */
-UNIDAD_PCTJ = "%" /* porcentaje */
-UNIDAD_MOLAR = "M" /* molaridad = mol/L */
-
-LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNIDAD_ML}|{UNIDAD_ATM}|{UNIDAD_KPA}|{UNIDAD_BAR}|{UNIDAD_K}|{UNIDAD_C}|{UNIDAD_PCTJ}|{UNIDAD_MOLAR})
 %%
 /* espacios y comentarios */
 {ESPACIO}                    { /* ignorar */ }
@@ -59,52 +44,36 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 
 "si"|
 "sino"|
-"sino_si"|
 "fin_si"|
 "mientras"|
 "fin_mientras"|
-"hacer"|
-"principal"|
-"fin_principal"|
-"elemento"|
-"compuesto"|
-"solucion"|
-"moles"|
-"peso"|
-"estado"|
-"solido"|
-"liquido"|
-"litros"|
-"gaseoso"|
-"acuoso"|
-"reaccion"|
-"agregar"|
-"eliminar"|
-"limpiar"|
-"mezclar"|
-"disolver"|
-"precipitar"|
-"evaporar"|
-"destilar"|
-"medir_ph"|
-"medir_temp"|
-"medir_presion"|
-"agitar"|
-"calentar"|
-"enfriar"|
-"neutralizar"|
-"balancear_reaccion"|
-"ejecutar_reaccion"|
-"duracion"|
-"mostrar"|
-"mostrar_info"|
-"enviar_alerta"|
-"imprimir" { return token(yytext(),"PALABRA_RESERVADA",yyline,yycolumn); }
- 
+"analisis_lexico"|
+"analisis_sintactico"|
+"principal"| 
+"ignorar"|
+"token"|
+"patron"|
+"inicio"|
+"regla"|
+"vacio"|
+"terminales"|
+"no_terminales"|
+"entrada"|
+"imprimir"|
+"arbol"|
+"tokens"|
+"dibujar"|
+"cargar_archivo"|
+"linea"|
+"columna"|
+"verificar_errores"|
+"ver_errores"|
+"limpiar_errores"|
+"compilar"|
+"seccion" {return token(yytext(),"PALABRA_RESERVADA",yyline,yycolumn); }
+
 "+"|
-"-"|
-"*"|
-"/"  { return token(yytext(),"OPE_ARITMETICO",yyline,yycolumn); }
+"*" { return token(yytext(),"OPE_ARITMETICO",yyline,yycolumn); }
 
 "=="|
 "!="|
@@ -125,10 +94,15 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
 "}"|
 "["|
 "]"|
-";" { return token(yytext(),"DELIMITADOR",yyline,yycolumn); }
+"|"| 
+";"|
+"," 
+":" { return token(yytext(),"DELIMITADOR",yyline,yycolumn); }
+
+
 
 {CADENA} { return token(yytext(),"CADENA",yyline,yycolumn); }
-{LIT_NUMERICA} { return token(yytext(),"LIT_NUMERICA",yyline,yycolumn); }
+
 {NUMERO} { return token(yytext(),"NUMERO",yyline,yycolumn); }
 
 /*   ERRORES DE IDENTIFICADOR    */
@@ -149,10 +123,12 @@ LIT_NUMERICA = {NUMERO}({UNIDAD_MOL}|{UNIDAD_GRAMOS}|{UNIDAD_KG}|{UNIDAD_L}|{UNI
  
   /* -------- Errores léxicos comunes -------- */
   \"[^\"\n]* { return token(yytext(),"ERROR_CADENA_NO_CERRADA",yyline,yycolumn); }
-  [^\s\w\[\]{}();:,.=<>+\-*/\"ÁÉÍÓÚÜÑáéíóúüñ%] { return token(yytext(),"ERROR_CARACTER_INVALIDO",yyline,yycolumn); }
+  
+[^\s\w\[\]{}();:,.=<>+\-*/\"ÁÉÍÓÚÜÑáéíóúüñ%] { return token(yytext(),"ERROR_CARACTER_INVALIDO",yyline,yycolumn); }
+({ENTERO}"." ) | ("."{ENTERO}) { return token(yytext(),"ERROR_NUMERO_MALFORMADO",yyline,yycolumn); }
 
 /* -------- Error de análisis -------- */
 . {return token(yytext(), "ERROR", yyline, yycolumn);}
-({ENTERO}"." ) | ("."{ENTERO}) { return token(yytext(),"ERROR_NUMERO_MALFORMADO",yyline,yycolumn); }
+
 
 
