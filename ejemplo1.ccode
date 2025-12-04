@@ -2,25 +2,62 @@ compilar MiniVariables {
 
     # Análisis Léxico
     seccion analisis_lexico {
+	
+	definir_alfabeto {
+	   conjunto letras = ["a-zA-Z"];
+	   conjunto digitos = ["0-9"];
+	   conjunto simbolos = ["=",";"];
+	   conjunto espacios = [" ", "\t","\n"];
+	}
 
-        ignorar: "[ \t\n]+";
+	definir_tokens{
+	  palabras_reservadas = ["var","print","end"];
+          token ID;
+          token NUM;
+          token ASIG;
+          token PCOMA;
+          token ERROR; 
+       }
 
-        patron DIGITO = "[0-9]";
-        patron LETRA  = "[a-zA-Z]";
+	ejecutar_automata {
+	   estados: q0, q1, q2, q3,q4, q_error;
+	   estado_inicial: q0;
+	   estados_finales: [ q1 = ID, q2 = NUM, q3 = ASIG, q4 = PCOMA ];
+           
+	   transiciones {
+              (q0, espacios) => q0;
+	      (q0, letras) => q1;
+	      (q0, digitos) => q2;
+              (q0, "=") => q3;
+	      (q0, ";") => q4;
+              (q0, otro) => q_error;
 
-        # Palabras reservadas
-        token VAR     = "var";
-        token PRINT   = "print";
-        token END     = "end";
+              (q1, letras) => q1;
+              (q1, digitos) => q1;
+              (q2, digitos) => q2;
+	   }
 
-        token ID      = LETRA(LETRA|DIGITO)*;
-        token NUM     = DIGITO+;
-        token ASIG    = "=";
-        token PCOMA   = ";";
+	
+	}
 
-        # Error léxico
-        token ERROR = ".";
+	
     }
+
+    seccion tabla_simbolos {
+       
+       estructura_tabla Tabla {
+          campo nombre, tipo, lineaId, direccion;
+	}
+     
+       tabla TS;
+      
+       construir_tabla(tokens_entrada) {
+         # Genera la tabla basado en la estructura definida y filtrando los ids
+	 TS = generar_TablaSimbolos(tokens_entrada,ID);
+      }
+   
+    }
+
 
     # Análisis Sintáctico
     seccion analisis_sintactico {
@@ -30,8 +67,10 @@ compilar MiniVariables {
 
         inicio: Programa;
 
-        regla Programa: Instruccion Programa | END ;
-        regla Instruccion: VAR ID ASIG NUM PCOMA | PRINT ID PCOMA ;
+        regla Programa: Instruccion Programa;
+        regla Programa: END ;
+        regla Instruccion: VAR ID ASIG NUM PCOMA;
+        regla Instruccion: PRINT ID PCOMA ;
     }
 
     # Bloque Principal
@@ -52,6 +91,9 @@ compilar MiniVariables {
             ver_errores t;
             limpiar_errores t;
         sino
+            construir_tabla(t);
+            imprimir("--- TABLA DE SIMBOLOS ---");
+            imprimir(TS);
 
             arbol a = analisis_sintactico(codigo);
 
@@ -68,3 +110,5 @@ compilar MiniVariables {
         fin_si
     }
 }
+
+ejecutarProg MiniVariables;
