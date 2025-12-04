@@ -8,6 +8,9 @@ import java.awt.Image;
 import java.io.*;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java_cup.runtime.Symbol;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -411,6 +414,34 @@ public class Compilador extends javax.swing.JFrame {
         dialogoTabla.setVisible(true);
     }
     
+    private void ejecutarAnalisisSintactico() {
+        String codigoFuente = jCode.getText();
+            Reader lector = new StringReader(codigoFuente);
+        LexerCup lexer = new LexerCup(lector);
+        Sintaxis sintax = new Sintaxis(lexer); 
+        try {
+            
+            
+
+            sintax.parse();
+            jErrores.setText("¡Análisis sintáctico completado correctamente!");
+        } catch (Exception e) {
+            Symbol sym = sintax.getS(); // Usamos el método que creamos en el CUP
+        
+        if (sym != null) {
+            // Tenemos info precisa del error
+            String lexema = (sym.value != null) ? sym.value.toString() : "Token desconocido";
+            int linea = sym.left + 1;
+            int columna = sym.right + 1;
+            
+            jErrores.setText("Error de sintaxis en Línea: " + linea + ", Columna: " + columna + ". Texto: \"" + lexema + "\"");
+        } else {
+            // Si sym es nulo, usamos el mensaje genérico
+            jErrores.setText("Error sintáctico: " + e.getMessage());
+        }
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -434,6 +465,7 @@ public class Compilador extends javax.swing.JFrame {
         jMenuItem2 = new javax.swing.JMenuItem();
         menuCompilar = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem8 = new javax.swing.JMenuItem();
         menuTablaSimbolos = new javax.swing.JMenu();
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
@@ -493,6 +525,7 @@ public class Compilador extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        jMenuBar1.setBackground(new java.awt.Color(153, 0, 51));
         jMenuBar1.setBorder(null);
         jMenuBar1.setToolTipText("");
 
@@ -541,6 +574,15 @@ public class Compilador extends javax.swing.JFrame {
             }
         });
         menuCompilar.add(jMenuItem3);
+
+        jMenuItem8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jMenuItem8.setText("Analisis Sintáctico");
+        jMenuItem8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem8ActionPerformed(evt);
+            }
+        });
+        menuCompilar.add(jMenuItem8);
 
         jMenuBar1.add(menuCompilar);
 
@@ -621,6 +663,10 @@ public class Compilador extends javax.swing.JFrame {
         VerTablaFunciones();
     }//GEN-LAST:event_jMenuItem6ActionPerformed
 
+    private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
+      ejecutarAnalisisSintactico();
+    }//GEN-LAST:event_jMenuItem8ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -670,6 +716,7 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
+    private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
