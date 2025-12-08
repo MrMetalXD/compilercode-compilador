@@ -9,14 +9,9 @@ import static codigo.Tokens.*;
 
 %{
     private final TablaSimbolos tablaSimbolos = new TablaSimbolos();
-    private final TablaFunciones tablaFunciones = new TablaFunciones();
 
     public TablaSimbolos getTablaSimbolos() {
         return this.tablaSimbolos;
-    }
-
-    public TablaFunciones getTablaFunciones() { 
-        return this.tablaFunciones;
     }
 
     private Tokens token(String lex, String comp, int li, int c){

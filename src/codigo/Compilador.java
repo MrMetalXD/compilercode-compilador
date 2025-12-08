@@ -34,7 +34,6 @@ public class Compilador extends javax.swing.JFrame {
     private boolean actualizandoTexto = false;
     public String rute="";
     private TablaSimbolos tablaDeSimbolosGlobal;
-    private TablaFunciones tablaDeFuncionesGlobal;
     //Variable para la imagen de fondo
    // FondoPanel fondo = new FondoPanel();
 
@@ -128,7 +127,6 @@ public class Compilador extends javax.swing.JFrame {
             }
         }
         this.tablaDeSimbolosGlobal = null;
-        this.tablaDeFuncionesGlobal = null;
         // Limpiar el área y reiniciar el estado
         jCode.setText("");
         archivoActual = null;
@@ -178,7 +176,6 @@ public class Compilador extends javax.swing.JFrame {
     
     private void ejecutarAnalisisLexico(){
         this.tablaDeSimbolosGlobal = null;
-        this.tablaDeFuncionesGlobal = null;
         try {
             String codigo = jCode.getText();
             Reader lector = new BufferedReader(new StringReader(codigo));
@@ -227,7 +224,6 @@ public class Compilador extends javax.swing.JFrame {
                 }
             }
             this.tablaDeSimbolosGlobal = lexer.getTablaSimbolos();
-            this.tablaDeFuncionesGlobal = lexer.getTablaFunciones();
             
             if (errores.length() > 0) {
                 jErrores.setText("Se encontraron errores léxicos:\n" + errores.toString());
@@ -306,44 +302,30 @@ public class Compilador extends javax.swing.JFrame {
     }
     
     private void VerTablaIdentificadores(){
-        
-        // veremos si el análisis léxico ya se ejecutó
-        if (this.tablaDeSimbolosGlobal == null) {
+        TablaSimbolos tablaDelSintactico = Sintaxis.tabla;
+
+        if (tablaDelSintactico == null || tablaDelSintactico.getIdentificadores().isEmpty()) {
             JOptionPane.showMessageDialog(this, 
-                "Debe ejecutar el 'Analizador Léxico' primero.", 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
-            return; // Detiene el método para evitar el crash
+                "La tabla está vacía. Ejecuta el Análisis Sintáctico primero.", 
+                "Aviso", 
+                JOptionPane.INFORMATION_MESSAGE);
+            return; 
         }
-        
-        // se hace en un Jtable
-        String[] columnas = {"#" , "Nombre", "Tipo", "Línea", "Columna", "Direccion Memoria"}; 
+
+        String[] columnas = {"Identificador", "Tipo", "Dirección", "Línea", "Columna"};
         DefaultTableModel model = new DefaultTableModel(columnas, 0);
-        //obtenemos el mapa de identificadores
-        Map<String, TablaSimbolos.EntradaIdentificador> identificadores = tablaDeSimbolosGlobal.getIdentificadores();
-        
-        if(identificadores.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No se encontraron identificadores en el codigo fuente",
-                    "Tabla de simbolos vacia",JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        int contador = 1;
-        //Llena el modelo con los datos
+
+        //Llenamos los datos
+        var identificadores = tablaDelSintactico.getIdentificadores();
         for (TablaSimbolos.EntradaIdentificador entrada : identificadores.values()) {
-            // Formateamos la dirección para que se vea bien
-            String dirMemoriaStr = (entrada.getDireccionMemoria() == -1) 
-                                    ? "N/A" // Si es -1, muestra N/A
-                                    : String.valueOf(entrada.getDireccionMemoria()); // Si no, muestra el número
             model.addRow(new Object[]{
-                contador++,
                 entrada.getNombre(),
-                entrada.getTipo(), 
+                entrada.getTipo(),              
+                entrada.getDireccionMemoria(),  
                 entrada.getLinea(),
-                entrada.getColumna(),
-                dirMemoriaStr
+                entrada.getColumna()
             });
         }
-        //Crea y muestra la ventana (JDialog) con la tabla
         JTable tablaGUI = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(tablaGUI);
         JDialog dialogoTabla = new JDialog(this, "Tabla de Variable (Identificadores)", true);
@@ -354,7 +336,6 @@ public class Compilador extends javax.swing.JFrame {
     }
     
     private void VerTablaFija() {
-        // Preparamos el modelo para la JTable
         String[] columnas = {"Palabra Reservada", "Componente Léxico"};
         DefaultTableModel model = new DefaultTableModel(columnas, 0);
         //Obtiene la lista de palabras de la clase estática
@@ -378,51 +359,12 @@ public class Compilador extends javax.swing.JFrame {
         dialogoTabla.setVisible(true);
     }
     
-    private void VerTablaFunciones() {
-        //Verifica si el análisis léxico ya se ejecutó
-        if (this.tablaDeFuncionesGlobal == null) {
-            JOptionPane.showMessageDialog(this, 
-                "Debe ejecutar el 'Analizador Léxico' primero.", 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
-            return; // Detiene el método
-        }
-        //preparamos el modelo para la JTable
-        String[] columnas = {"Función", "Línea", "Tipo Retorno", "Parámetros"};
-        DefaultTableModel model = new DefaultTableModel(columnas, 0);
-        //Obtiene el mapa de funciones
-        Map<String, TablaFunciones.EntradaFuncion> funciones = 
-            tablaDeFuncionesGlobal.getFunciones();
-        //Llena el modelo con los datos
-        for (TablaFunciones.EntradaFuncion entrada : funciones.values()) {
-            // Convertimos la lista de parámetros a un String legible
-            String params = entrada.getTiposParametros().toString(); 
-            model.addRow(new Object[]{
-                entrada.getNombre(),
-                entrada.getLinea(),
-                entrada.getTipoRetorno(),
-                params  // Mostramos la lista de parámetros
-            });
-        }
-        //Crea y muestra la ventana (JDialog)
-        JTable tablaGUI = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(tablaGUI);
-        JDialog dialogoTabla = new JDialog(this, "Tabla de Funciones", true);
-        dialogoTabla.add(scrollPane);
-        dialogoTabla.setSize(600, 400);
-        dialogoTabla.setLocationRelativeTo(this);
-        dialogoTabla.setVisible(true);
-    }
-    
     private void ejecutarAnalisisSintactico() {
         String codigoFuente = jCode.getText();
             Reader lector = new StringReader(codigoFuente);
         LexerCup lexer = new LexerCup(lector);
         Sintaxis sintax = new Sintaxis(lexer); 
         try {
-            
-            
-
             sintax.parse();
             jErrores.setText("¡Análisis sintáctico completado correctamente!");
         } catch (Exception e) {
@@ -469,7 +411,6 @@ public class Compilador extends javax.swing.JFrame {
         menuTablaSimbolos = new javax.swing.JMenu();
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -608,15 +549,6 @@ public class Compilador extends javax.swing.JFrame {
         });
         menuTablaSimbolos.add(jMenuItem5);
 
-        jMenuItem6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jMenuItem6.setText("Tabla de funciones ");
-        jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem6ActionPerformed(evt);
-            }
-        });
-        menuTablaSimbolos.add(jMenuItem6);
-
         jMenuBar1.add(menuTablaSimbolos);
 
         setJMenuBar(jMenuBar1);
@@ -658,10 +590,6 @@ public class Compilador extends javax.swing.JFrame {
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
        ejecutarAnalisisLexico();
     }//GEN-LAST:event_jMenuItem3ActionPerformed
-
-    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
-        VerTablaFunciones();
-    }//GEN-LAST:event_jMenuItem6ActionPerformed
 
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
       ejecutarAnalisisSintactico();
@@ -714,7 +642,6 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
-    private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JPanel jPanel1;

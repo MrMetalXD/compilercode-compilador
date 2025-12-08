@@ -1,7 +1,10 @@
 package codigo;
 import java_cup.runtime.Symbol;
+import codigo.TablaSimbolos;
 
 parser code {:
+    public static TablaSimbolos tabla = new TablaSimbolos();
+
     private Symbol s;
 
     public Symbol getS(){
@@ -10,18 +13,17 @@ parser code {:
 
     public void syntax_error(Symbol s){
         this.s = s;
-        System.err.println("Errror sintáctico: "+ s.value);
+        System.err.println("Error sintáctico: "+ s.value);
     }   
 :};
 
-
-/* TERMINALES */
-terminal COMPILAR, SECCION, ANALISIS_LEXICO, ANALISIS_SINTACTICO, PRINCIPAL,SI, SINO, FIN_SI, MIENTRAS, FIN_MIENTRAS,
+/* TERMINALES AGREGADOS: TERMINALES, TOKENS */
+terminal COMPILAR, SECCION, ANALISIS_LEXICO, ANALISIS_SINTACTICO, PRINCIPAL, SI, SINO, FIN_SI, MIENTRAS, FIN_MIENTRAS,
 DEFINIR_ALFABETO, CONJUNTO, DEFINIR_TOKENS, PALABRAS_RESERVADAS, EJECUTAR_AUTOMATA, ESTADOS, ESTADO_INICIAL, ESTADOS_FINALES, 
-TRANSICIONES, OTRO, TABLA_SIMBOLOS, ESTRUCTURA_TABLA, CAMPO, TABLA, GENERAR_TS,CONSTRUIR_TABLA, ENTRADA, 
-IMPRIMIR, ARBOL, TOKENS, DIBUJAR, CARGAR_ARCHIVO, VERIFICAR_ERRORES, VER_ERRORES, LIMPIAR_ERRORES, LINEA, COLUMNA, OPE_ASIGNACION, 
-OPE_ARITMETICO, OPE_RELACIONAL, OPE_LOGICO, LLAVE_ABRE, LLAVE_CIERRA, PAREN_ABRE, PAREN_CIERRA,COMA, DOS_PUNTOS, 
-PUNTO_COMA, CORCHETE_ABRE, CORCHETE_CIERRA, OPE_TRANSICION, ID, CADENA, NUMERO, NO_TERMINALES, VACIO, REGLA, INICIO, EJECUTARPROG;
+TRANSICIONES, OTRO, TABLA_SIMBOLOS, ESTRUCTURA_TABLA, CAMPO, TABLA, GENERAR_TS, CONSTRUIR_TABLA, ENTRADA, 
+IMPRIMIR, ARBOL, TOKEN, TOKENS, IGNORAR, PATRON, DIBUJAR, CARGAR_ARCHIVO, VERIFICAR_ERRORES, VER_ERRORES, LIMPIAR_ERRORES, LINEA, COLUMNA, OPE_ASIGNACION, 
+OPE_ARITMETICO, OPE_RELACIONAL, OPE_LOGICO, LLAVE_ABRE, LLAVE_CIERRA, PAREN_ABRE, PAREN_CIERRA, COMA, DOS_PUNTOS, 
+PUNTO_COMA, CORCHETE_ABRE, CORCHETE_CIERRA, OPE_TRANSICION, ID, CADENA, NUMERO, NO_TERMINALES, TERMINALES, VACIO, REGLA, INICIO, EJECUTARPROG;
 
 /* NO TERMINALES */
 non terminal programa, lista_secciones, seccion, seccion_lexico, lista_declaracion_lex, declaracion_lex,
@@ -36,11 +38,9 @@ precedence left OPE_LOGICO;
 precedence left OPE_RELACIONAL;
 precedence left OPE_ARITMETICO;
 
-
 start with programa;
 
 /* ESTRUCTURA GENERAL DEL PROGRAMA */
-
 programa ::= COMPILAR ID LLAVE_ABRE lista_secciones LLAVE_CIERRA EJECUTARPROG ID PUNTO_COMA ;
 
 lista_secciones ::= lista_secciones seccion | seccion ;
@@ -48,86 +48,69 @@ lista_secciones ::= lista_secciones seccion | seccion ;
 seccion ::= seccion_lexico | seccion_sintactico | seccion_principal | seccion_tabla;
 
 /* SECCION ANALISIS_LEXICO  */
-
 seccion_lexico ::= SECCION ANALISIS_LEXICO LLAVE_ABRE lista_declaracion_lex LLAVE_CIERRA;
-
 lista_declaracion_lex ::= lista_declaracion_lex declaracion_lex | declaracion_lex;
-
 declaracion_lex ::= def_alfabeto | def_tokens | def_automata;
 
 def_alfabeto ::= DEFINIR_ALFABETO LLAVE_ABRE lista_conjuntos LLAVE_CIERRA;
-
 lista_conjuntos ::= lista_conjuntos conjunto_decl | conjunto_decl;
-
-conjunto_decl ::= CONJUNTO ID OPE_ASIGNACION CORCHETE_ABRE lista_elementos CORCHETE_CIERRA PUNTO_COMA;
-
-lista_elementos ::= CADENA | lista_elementos COMA CADENA;
+/* --- REGLA PARA CONJUNTOS --- */
+conjunto_decl ::= CONJUNTO ID:id OPE_ASIGNACION CORCHETE_ABRE lista_elementos CORCHETE_CIERRA PUNTO_COMA {:
+    //Registrar con línea y columna
+    parser.tabla.registrarIdentificador((String)id, idleft + 1, idright + 1);
+    //Asignar tipo
+    parser.tabla.asignarTipoyDireccion((String)id, "CONJUNTO_ALFABETO");
+:};
 
 def_tokens ::= DEFINIR_TOKENS LLAVE_ABRE lista_decl_tokens LLAVE_CIERRA;
-
 lista_decl_tokens ::= lista_decl_tokens decl_token | decl_token | decl_pal_res;
-
 decl_pal_res ::= PALABRAS_RESERVADAS OPE_ASIGNACION CORCHETE_ABRE lista_elementos CORCHETE_CIERRA PUNTO_COMA;
-
-decl_token ::= TOKEN ID PUNTO_COMA;
+/* --- REGLA PARA TOKENS --- */
+decl_token ::= TOKEN ID:id {: 
+    //registramos con LINEA (idleft) y COLUMNA (idright) y Sumamos 1 porque JCup empieza a contar en 0
+    parser.tabla.registrarIdentificador((String)id, idleft + 1, idright + 1);
+    //asignamos el tipo y la dirección
+    parser.tabla.asignarTipoyDireccion((String)id, "TOKEN"); 
+    System.out.println("Token registrado: " + id + " en linea: " + (idleft+1));
+:} PUNTO_COMA;
 
 def_automata ::= EJECUTAR_AUTOMATA LLAVE_ABRE lista_decl_automata LLAVE_CIERRA;
-
 lista_decl_automata ::= lista_decl_automata decl_automata | decl_automata;
-
 decl_automata ::= ESTADOS DOS_PUNTOS lista_estados PUNTO_COMA | ESTADO_INICIAL DOS_PUNTOS ID PUNTO_COMA 
-     | ESTADOS_FINALES DOS_PUNTOS CORCHETE_ABRE lista_estados_finales CORCHETE_CIERRA PUNTO_COMA
-    | TRANSICIONES LLAVE_ABRE lista_transiciones LLAVE_CIERRA;
+      | ESTADOS_FINALES DOS_PUNTOS CORCHETE_ABRE lista_estados_finales CORCHETE_CIERRA PUNTO_COMA
+     | TRANSICIONES LLAVE_ABRE lista_transiciones LLAVE_CIERRA;
 
 lista_estados ::= ID | lista_estados COMA ID;
-
 lista_estados_finales ::= estado_final | lista_estados_finales COMA estado_final;
-
 estado_final ::= ID OPE_ASIGNACION ID;
-
 lista_transiciones ::= lista_transiciones transicion | transicion;
-
 transicion ::= PAREN_ABRE ID COMA entrada_transicion PAREN_CIERRA OPE_TRANSICION ID PUNTO_COMA;
-
 entrada_transicion ::= ID | CADENA | OTRO;
 
 /* SECCION ANALISIS_SINTACTICO */
-
 seccion_sintactico ::= SECCION ANALISIS_SINTACTICO LLAVE_ABRE lista_declaracion_sintac LLAVE_CIERRA;
-
 lista_declaracion_sintac ::= lista_declaracion_sintac declaracion_sintac | declaracion_sintac;
-
 declaracion_sintac ::= TERMINALES DOS_PUNTOS ids PUNTO_COMA | NO_TERMINALES DOS_PUNTOS ids PUNTO_COMA 
     | INICIO DOS_PUNTOS ID PUNTO_COMA | REGLA ID DOS_PUNTOS producciones PUNTO_COMA | VACIO PUNTO_COMA;
 
 producciones ::= producciones ID | ID; 
-
 ids ::= ID | ids COMA ID;
 
 /* SECCION TABLA_SIMBOLOS */
-
 seccion_tabla ::= SECCION TABLA_SIMBOLOS LLAVE_ABRE contenido_tabla instrucciones_tabla LLAVE_CIERRA;
-
 contenido_tabla ::= contenido_tabla decl_tabla | decl_tabla;
-
 decl_tabla ::= ESTRUCTURA_TABLA ID LLAVE_ABRE CAMPO ids PUNTO_COMA LLAVE_CIERRA | TABLA ID PUNTO_COMA;
-
 instrucciones_tabla ::= instrucciones_tabla instruccion_tabla | /* vacio */ ;
-
 instruccion_tabla ::= CONSTRUIR_TABLA expresion LLAVE_ABRE instrucciones LLAVE_CIERRA;
 
 /* SECCION PRINCIPAL */
-
 seccion_principal ::= SECCION PRINCIPAL LLAVE_ABRE instrucciones LLAVE_CIERRA ;
-
 instrucciones ::=  instrucciones instruccion | instruccion;
-
 instruccion ::=  asignacion PUNTO_COMA | funcion PUNTO_COMA | llamada_reservada PUNTO_COMA |condicion_si | ciclo_mientras ;
 
 asignacion ::= ID OPE_ASIGNACION expresion | ENTRADA ID OPE_ASIGNACION expresion | TOKENS ID OPE_ASIGNACION expresion | ARBOL ID OPE_ASIGNACION expresion;
 
 funcion ::= IMPRIMIR expresion | DIBUJAR expresion | VER_ERRORES expresion | LIMPIAR_ERRORES expresion;
-
 llamada_reservada ::= CONSTRUIR_TABLA expresion;
 
 condicion_si ::= SI PAREN_ABRE condicion PAREN_CIERRA instrucciones FIN_SI 
@@ -144,5 +127,4 @@ exp_llamada ::= CARGAR_ARCHIVO expresion | VERIFICAR_ERRORES expresion | LINEA e
 | ANALISIS_SINTACTICO expresion;
 
 llamada_metodo ::= ID PAREN_ABRE argumentos PAREN_CIERRA;
-
 argumentos ::= argumentos COMA expresion | expresion | /* vacio */ ;
