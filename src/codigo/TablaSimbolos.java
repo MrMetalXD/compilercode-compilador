@@ -65,12 +65,21 @@ public class TablaSimbolos {
     private int siguienteDireccion = 1000;
     
     private int tamanoPorTipo(String tipo) {
-        switch(tipo){
-            case "elemento":
-            case "compuesto":
-            case "solucion":
+        switch (tipo) {
+            case "identificador":
+                return 8; // espacio para almacenar nombre en la tabla
+            case "numero":
+                return 4; // entero
+            case "cadena":
+                return 12; // referencia + longitud aproximada
+            case "palabra_reservada":
+                return 0; // no ocupa espacio en memoria del programa
+            case "token":
+                return 4; // tamaño estándar de token
+            case "seccion": // analisis_lexico, analisis_sintactico, principal
+                return 0; // no es un valor almacenado
             default:
-                return 4; //bytes por defecto
+                return 4; // tamaño por defecto
         }
     }
     
