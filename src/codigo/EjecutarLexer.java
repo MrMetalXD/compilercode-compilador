@@ -17,9 +17,9 @@ import java.nio.file.Paths;
 public class EjecutarLexer {
     public static void main(String[] args) throws Exception {
         // Cambiar la ruta de acuerdo a su equipo
-        String ruta = "C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/Lexer.flex";
-        String rutaLexerCup = "C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/LexerCup.flex";
-        String[] rutaCup = {"-parser","Sintaxis","C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/Sintaxis.cup"};
+        String ruta = "C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/Lexer.flex";
+        String rutaLexerCup = "C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/LexerCup.flex";
+        String[] rutaCup = {"-parser","Sintaxis","C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/Sintaxis.cup"};
         
         generar(ruta,rutaLexerCup,rutaCup);
     }
@@ -33,25 +33,25 @@ public class EjecutarLexer {
         
         java_cup.Main.main(rutaCup);
         
-        Path rutaSym = Paths.get("C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/Sym.java");
+        Path rutaSym = Paths.get("C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/Sym.java");
         
         if(Files.exists(rutaSym)){
             Files.delete(rutaSym);
         }
         
         Files.move(
-                Paths.get("C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/sym.java"), 
-                Paths.get("C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/sym.java")
+                Paths.get("C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/sym.java"), 
+                Paths.get("C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/sym.java")
         );
         
-        Path rutaSintaxis = Paths.get("C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/Sintaxis.java");
+        Path rutaSintaxis = Paths.get("C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/Sintaxis.java");
         
         if(Files.exists(rutaSintaxis)) {
             Files.delete(rutaSintaxis);
         }
         
-        Files.move(Paths.get("C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/Sintaxis.java"), 
-                Paths.get("C:/Users/carme/Escritorio/Tec/9 semestre/quimcode-compilador/src/codigo/Sintaxis.java"));
+        Files.move(Paths.get("C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/Sintaxis.java"), 
+                Paths.get("C:/Users/alanc/OneDrive/Documents/Tec/11vo Semestre/Lenguajes y Automatas 1/Unidad 4/compilercode-compilador/src/codigo/Sintaxis.java"));
     }
     
     
