@@ -178,12 +178,13 @@ public class Compilador extends javax.swing.JFrame {
     }
     
     private void ejecutarAnalisisLexico(){
-        this.tablaDeSimbolosGlobal = null;
-        this.tablaDeFuncionesGlobal = null;
+        // Creamos la tabla de simbolo
+        this.tablaDeSimbolosGlobal = new TablaSimbolos();
+
         try {
             String codigo = jCode.getText();
             Reader lector = new BufferedReader(new StringReader(codigo));
-            Lexer lexer = new Lexer(lector);
+            Lexer lexer = new Lexer(lector, this.tablaDeSimbolosGlobal);
             
             if (codigo == null || codigo.trim().isEmpty()){
                 JOptionPane.showMessageDialog(this,
@@ -227,8 +228,11 @@ public class Compilador extends javax.swing.JFrame {
                     }
                 }
             }
-            this.tablaDeSimbolosGlobal = lexer.getTablaSimbolos();
-            this.tablaDeFuncionesGlobal = lexer.getTablaFunciones();
+            
+            System.out.println("Total identificadores en tabla: " +
+        this.tablaDeSimbolosGlobal.getIdentificadores().size());
+            //this.tablaDeSimbolosGlobal = lexer.getTablaSimbolos();
+            //this.tablaDeFuncionesGlobal = lexer.getTablaFunciones();
             
             if (errores.length() > 0) {
                 jErrores.setText("Se encontraron errores léxicos:\n" + errores.toString());
@@ -308,7 +312,6 @@ public class Compilador extends javax.swing.JFrame {
     
     private void VerTablaIdentificadores(){
         
-        TablaSimbolos tablaDelSintactico = Sintaxis.tabla;  
         
         // veremos si el análisis léxico ya se ejecutó
         if (this.tablaDeSimbolosGlobal == null) {
@@ -319,32 +322,19 @@ public class Compilador extends javax.swing.JFrame {
             return; // Detiene el método para evitar el crash
         }
         
-        TablaSimbolos tablaLexico = this.tablaDeSimbolosGlobal;
-        TablaSimbolos tablaSintactico = Sintaxis.tabla;
+        TablaSimbolos tabla = this.tablaDeSimbolosGlobal;
         
         //obtenemos el mapa de identificadores
-        Map<String, TablaSimbolos.EntradaIdentificador> ids = new LinkedHashMap<>();
+        Map<String, TablaSimbolos.EntradaIdentificador> ids = new LinkedHashMap<>(tabla.getIdentificadores());
         
-        //Primero metemos todo lo que encontró el LÉXICO
-        if (tablaLexico != null) {
-            ids.putAll(tablaLexico.getIdentificadores());
-        }
-        
-        //Sobrescribimos la parte que nos manda el analisis sintactico
-        if (tablaSintactico != null) {
-            for (Map.Entry<String, TablaSimbolos.EntradaIdentificador> e : tablaSintactico.getIdentificadores().entrySet()) {
-                ids.put(e.getKey(), e.getValue());
-            }
-        }
-
-        // 4. Si al final no hay nada, avisamos
-        if (ids.isEmpty()) {
+        if(ids.isEmpty()){
             JOptionPane.showMessageDialog(this, 
-                "No se encontraron identificadores en el código fuente.",
-                "Tabla de símbolos vacía",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "No se encontraron identificadores en el código fuente.",
+                    "Tabla de símbolos vacía",
+                    JOptionPane.INFORMATION_MESSAGE);
             return;
         }
+        
 
         // se hace en un Jtable
         String[] columnas = {"#" , "Nombre", "Tipo", "Línea", "Columna", "Direccion Memoria"}; 
@@ -406,9 +396,17 @@ public class Compilador extends javax.swing.JFrame {
     private void ejecutarAnalisisSintactico() {
        jErrores.setText("");
        String codigoFuente = jCode.getText();
+       
+       if(this.tablaDeSimbolosGlobal == null){
+           JOptionPane.showMessageDialog(this, 
+                   "Debe de ejecutar el Análisis Léxico primero",
+                   "Error",
+                   JOptionPane.ERROR_MESSAGE);
+           return;
+       }
        Reader lector = new StringReader(codigoFuente);
        LexerCup lexer = new LexerCup(lector);
-       Sintaxis sintax = new Sintaxis(lexer, jErrores);
+       Sintaxis sintax = new Sintaxis(lexer, jErrores, this.tablaDeSimbolosGlobal);
         try {
             sintax.parse();
             jErrores.setText("\n -------- ANALISIS SINTACTICO COMPLETADO SIN ERRORES ------- ");
