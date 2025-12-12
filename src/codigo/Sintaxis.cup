@@ -2,17 +2,19 @@ package codigo;
 import java_cup.runtime.Symbol;
 
 parser code {:
-    public static TablaSimbolos tabla = new TablaSimbolos();
+    public static TablaSimbolos tabla;
     private Symbol s;
     private java.util.List<String> errores = new java.util.ArrayList<>();
     private java_cup.runtime.Scanner scanner;
     private javax.swing.JTextPane jErrorArea;
 
     // ---- CONSTRUCTOR QUE SI SE USA ----
-    public Sintaxis(java_cup.runtime.Scanner s, javax.swing.JTextPane area){
+    public Sintaxis(java_cup.runtime.Scanner s, javax.swing.JTextPane area, TablaSimbolos t){
         super(s);           // llama al parser de CUP
         this.scanner = s;   // guarda el scanner
         this.jErrorArea = area;   // guarda tu JTextPane
+        Sintaxis.tabla = t; //tabla compartida entre el lexico y sintactico
+
     }
 
     public Symbol getS(){ 
