@@ -8,15 +8,15 @@ import static codigo.Tokens.*;
 %column
 
 %{
-    private final TablaSimbolos tablaSimbolos = new TablaSimbolos();
-    private final TablaFunciones tablaFunciones = new TablaFunciones();
-
-    public TablaSimbolos getTablaSimbolos() {
-        return this.tablaSimbolos;
+    private TablaSimbolos tablaSimbolos;
+    
+    public Lexer(java.io.Reader in, TablaSimbolos ts){
+        this(in);
+        this.tablaSimbolos = ts;
     }
-
-    public TablaFunciones getTablaFunciones() { 
-        return this.tablaFunciones;
+   
+     public TablaSimbolos getTablaSimbolos() {
+        return this.tablaSimbolos;
     }
 
     private Tokens token(String lex, String comp, int li, int c){
