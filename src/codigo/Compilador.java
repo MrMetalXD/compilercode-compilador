@@ -2,6 +2,7 @@ package codigo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.io.*;
@@ -26,6 +27,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 
 
 public class Compilador extends javax.swing.JFrame {
@@ -47,6 +49,7 @@ public class Compilador extends javax.swing.JFrame {
         initComponents();
         inicializar();
         this.setLocationRelativeTo(null);
+        habilitarZoom(jCode);
     }
     
     private void inicializar(){
@@ -431,7 +434,6 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jErrores = new javax.swing.JTextPane();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         menuArchivo = new javax.swing.JMenu();
         jMenuItem7 = new javax.swing.JMenuItem();
@@ -447,7 +449,7 @@ public class Compilador extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
-        jPanel1.setBackground(new java.awt.Color(30, 42, 56));
+        jPanel1.setBackground(new java.awt.Color(40, 0, 53));
 
         jCode.setBorder(null);
         jCode.setFont(new java.awt.Font("Consolas", 0, 14)); // NOI18N
@@ -458,8 +460,7 @@ public class Compilador extends javax.swing.JFrame {
         jErrores.setRequestFocusEnabled(false);
         jScrollPane2.setViewportView(jErrores);
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMAGENES/logo_quimcode.png"))); // NOI18N
-        jLabel2.setText("jLabel2");
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMAGENES/LOGO COMPILER CODE.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -468,33 +469,25 @@ public class Compilador extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 779, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 779, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(46, 46, 46)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 779, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(44, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel1)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(17, 17, 17)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 476, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(375, 375, 375)
-                                .addComponent(jLabel1))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(98, 98, 98)
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 197, Short.MAX_VALUE)))
+                        .addGap(17, 17, 17)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 476, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel1)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -662,12 +655,34 @@ public class Compilador extends javax.swing.JFrame {
             }
         });
     }
+    // Se usa una variable para poder aumentar o disminuir el zoom dinámicamente
+    private int fontSize = 14;
+    private void habilitarZoom(JTextPane textpane){
+        // Se establece la fuente inicial del editor
+        textpane.setFont(new Font("Console",Font.PLAIN, fontSize));
+        // Se añade un listener para detectar el uso de la rueda del mouse
+        textpane.addMouseWheelListener(e ->{
+            // Verificamos si la tecla Ctrl está presionada
+            if(e.isControlDown()){
+                // Evita que el evento afecte al scroll normal
+                e.consume();
+                // Si la rueda se mueve hacia arriba → aumentar zoom
+                if(e.getWheelRotation()<0 && fontSize < 40){
+                    fontSize++;
+                // Si la rueda se mueve hacia abajo → disminuir zoom
+                } else if (e.getWheelRotation() > 0 && fontSize > 8){
+                    fontSize--;
+                }
+                // Se actualiza la fuente con el nuevo tamaño
+                textpane.setFont(new Font("Consolas", Font.PLAIN, fontSize));
+            }
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextPane jCode;
     private javax.swing.JTextPane jErrores;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
@@ -685,15 +700,7 @@ public class Compilador extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
     
     class FondoPanel extends JPanel {
-        private Image imagen;
-        public void paint(Graphics g){
-            imagen = new ImageIcon(getClass().getResource("/IMAGENES/fondoQuimcode.png")).getImage();
-            g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
-            //Mostrar imagen de fondo
-            setOpaque(false);
-            //Dibujar todos los componentes del JFrame
-            super.paint(g);
-        }
+
     }
 
 }
